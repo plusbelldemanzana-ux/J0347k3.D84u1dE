@@ -3,27 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acceso remoto...</title>
+  <title>Terminal segura...</title>
   <style>
     :root{
-      --bg:#05070a;
-      --panel:#0b0f14;
+      --bg:#04070b;
+      --panel:#0a1017;
+      --panel2:#0d1520;
       --green:#58ff7e;
-      --green2:#21d84f;
+      --green2:#28db5a;
       --red:#ff4d4d;
-      --text:#c8ffd6;
+      --yellow:#ffd54a;
+      --text:#d8ffe3;
+      --muted:#9ed8ad;
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
 
     body{
       margin:0;
       min-height:100vh;
-      background:
-        radial-gradient(circle at top, rgba(40,255,120,.08), transparent 35%),
-        linear-gradient(180deg, #020304, #071018 70%);
-      color:var(--text);
       font-family: monospace;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top, rgba(88,255,126,.08), transparent 35%),
+        linear-gradient(180deg, #020304, #071018 70%);
       overflow:hidden;
       display:flex;
       align-items:center;
@@ -46,14 +49,14 @@
 
     .terminal{
       position:relative;
-      background:rgba(8,12,18,.88);
+      background:rgba(8,12,18,.9);
       border:1px solid rgba(88,255,126,.35);
-      border-radius:18px;
+      border-radius:20px;
       overflow:hidden;
       box-shadow:
         0 0 0 1px rgba(255,255,255,.03) inset,
         0 25px 80px rgba(0,0,0,.55),
-        0 0 30px rgba(88,255,126,.12);
+        0 0 35px rgba(88,255,126,.14);
       backdrop-filter: blur(6px);
     }
 
@@ -69,8 +72,8 @@
           transparent 2px,
           transparent 4px
         );
+      opacity:.14;
       pointer-events:none;
-      opacity:.18;
     }
 
     .topbar{
@@ -82,16 +85,16 @@
       background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     }
 
-    .dot{width:11px;height:11px;border-radius:50%}
-    .d1{background:#ff5f57}
-    .d2{background:#ffbd2e}
-    .d3{background:#28c840}
+    .dot{ width:12px; height:12px; border-radius:50%; }
+    .d1{ background:#ff5f57; }
+    .d2{ background:#ffbd2e; }
+    .d3{ background:#28c840; }
 
     .title{
       margin-left:10px;
-      color:#9be9b1;
+      color:#a7f0ba;
       font-size:14px;
-      opacity:.9;
+      opacity:.95;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -102,18 +105,431 @@
     }
 
     .big{
-      font-size: clamp(26px, 4vw, 44px);
-      color:var(--green);
-      font-weight:700;
+      font-size:clamp(28px, 5vw, 48px);
+      font-weight:800;
       letter-spacing:2px;
-      margin:4px 0 18px;
-      text-shadow:0 0 12px rgba(88,255,126,.35);
+      color:var(--green);
+      text-shadow:0 0 14px rgba(88,255,126,.35);
+      margin:4px 0 16px;
     }
 
     .status{
       display:flex;
       align-items:center;
       gap:10px;
-      margin-bottom:16px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
       color:#baf8c8;
-      opacity:.
+      opacity:.95;
+      min-height:28px;
+    }
+
+    .pulse{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 10px var(--green);
+      animation:pulse 1s infinite;
+      flex:0 0 auto;
+    }
+
+    @keyframes pulse{
+      0%{ transform:scale(1); opacity:1; }
+      50%{ transform:scale(1.8); opacity:.45; }
+      100%{ transform:scale(1); opacity:1; }
+    }
+
+    #output{
+      min-height:180px;
+      white-space:pre-line;
+      line-height:1.6;
+      font-size:16px;
+      color:#ddffe7;
+      text-shadow:0 0 8px rgba(88,255,126,.10);
+    }
+
+    .line-glitch{
+      animation:glitchLine .12s 2;
+    }
+
+    @keyframes glitchLine{
+      0%{transform:translateX(0)}
+      25%{transform:translateX(-2px)}
+      50%{transform:translateX(2px)}
+      75%{transform:translateX(-1px)}
+      100%{transform:translateX(0)}
+    }
+
+    .countdown-box{
+      display:none;
+      margin-top:12px;
+      padding:14px 16px;
+      border:1px solid rgba(255,213,74,.28);
+      background:rgba(255,213,74,.07);
+      border-radius:14px;
+      color:#fff1b8;
+      box-shadow:0 0 18px rgba(255,213,74,.08);
+    }
+
+    .countdown-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+      font-size:15px;
+    }
+
+    .countdown-number{
+      font-size:clamp(36px, 8vw, 72px);
+      font-weight:900;
+      line-height:1;
+      color:var(--yellow);
+      text-shadow:0 0 16px rgba(255,213,74,.35);
+      letter-spacing:2px;
+    }
+
+    .progress-wrap{
+      display:none;
+      margin-top:16px;
+    }
+
+    .progress-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+      font-size:14px;
+      color:#b8f7c6;
+    }
+
+    .bar{
+      width:100%;
+      height:18px;
+      border-radius:999px;
+      background:#121a22;
+      border:1px solid rgba(88,255,126,.25);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .fill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--green2), var(--green));
+      box-shadow:0 0 14px rgba(88,255,126,.4);
+      transition:width .2s linear;
+      position:relative;
+    }
+
+    .fill::after{
+      content:"";
+      position:absolute;
+      top:0; right:0;
+      width:42px; height:100%;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.45));
+      filter:blur(2px);
+    }
+
+    .checklist{
+      margin-top:18px;
+      display:grid;
+      gap:8px;
+      font-size:15px;
+      color:#d5ffe0;
+    }
+
+    .item{
+      opacity:.35;
+      transform:translateX(-8px);
+      transition:.25s ease;
+    }
+
+    .item.done{
+      opacity:1;
+      transform:translateX(0);
+    }
+
+    .item.done::before{
+      content:"> ";
+      color:var(--green);
+    }
+
+    .warning{
+      margin-top:18px;
+      color:var(--red);
+      font-weight:800;
+      display:none;
+      animation:shake .35s 3;
+      text-shadow:0 0 10px rgba(255,77,77,.35);
+    }
+
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-5px)}
+      40%{transform:translateX(5px)}
+      60%{transform:translateX(-4px)}
+      80%{transform:translateX(4px)}
+    }
+
+    .final{
+      display:none;
+      margin-top:22px;
+      padding:22px;
+      border-radius:18px;
+      background:
+        linear-gradient(180deg, rgba(255,77,77,.08), rgba(88,255,126,.06));
+      border:1px solid rgba(255,255,255,.12);
+      text-align:center;
+      animation:pop .35s ease;
+      box-shadow:0 0 30px rgba(255,77,77,.08);
+    }
+
+    @keyframes pop{
+      from{transform:scale(.96);opacity:0}
+      to{transform:scale(1);opacity:1}
+    }
+
+    .final h2{
+      margin:0 0 10px;
+      font-size:clamp(30px, 6vw, 58px);
+      color:#fff;
+      text-shadow:0 0 18px rgba(255,77,77,.18);
+      letter-spacing:1px;
+    }
+
+    .final p{
+      margin:8px 0;
+      color:#e5ffee;
+      font-size:16px;
+    }
+
+    .blink{
+      animation:blink 1s infinite;
+    }
+
+    @keyframes blink{
+      50%{ opacity:.25; }
+    }
+
+    .footer-note{
+      margin-top:12px;
+      font-size:13px;
+      opacity:.78;
+      color:#c9ffd6;
+    }
+
+    .actions{
+      margin-top:18px;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      font-family:inherit;
+      font-size:15px;
+      cursor:pointer;
+      transition:.2s ease;
+      color:#071018;
+      font-weight:800;
+      background:linear-gradient(90deg, var(--green), #86ff9f);
+      box-shadow:0 10px 30px rgba(88,255,126,.18);
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.04);
+    }
+
+    .btn.secondary{
+      background:linear-gradient(90deg, #ffd54a, #ffe58f);
+      box-shadow:0 10px 30px rgba(255,213,74,.16);
+    }
+
+    .red{ color:var(--red); }
+
+    .small-muted{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    @media (max-width: 640px){
+      .content{ padding:16px; }
+      #output{ min-height:150px; font-size:15px; }
+      .checklist{ font-size:14px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+
+  <div class="wrap">
+    <div class="terminal">
+      <div class="topbar">
+        <div class="dot d1"></div>
+        <div class="dot d2"></div>
+        <div class="dot d3"></div>
+        <div class="title">root@remote-shell:~# sesión segura iniciada</div>
+      </div>
+
+      <div class="content">
+        <div class="big">ACCESO REMOTO...</div>
+
+        <div class="status">
+          <div class="pulse"></div>
+          <div id="statusText">Iniciando secuencia del sistema...</div>
+        </div>
+
+        <div id="output"></div>
+
+        <div class="countdown-box" id="countdownBox">
+          <div class="countdown-head">
+            <span>Verificación final del sistema</span>
+            <span class="small-muted">No cierres esta ventana...</span>
+          </div>
+          <div class="countdown-number" id="countdownNum">5</div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-head">
+            <span id="progressLabel">Escaneando sistema...</span>
+            <span id="percent">0%</span>
+          </div>
+          <div class="bar">
+            <div class="fill" id="fill"></div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklist">
+          <div class="item" id="c1">Sincronizando consola...</div>
+          <div class="item" id="c2">Verificando paquete visual...</div>
+          <div class="item" id="c3">Cargando secuencia dramática...</div>
+          <div class="item" id="c4">Preparando remate final...</div>
+        </div>
+
+        <div class="warning" id="warning">[!] ALERTA VISUAL: nivel de curiosidad del objetivo detectado</div>
+
+        <div class="final" id="final">
+          <h2 id="finalTitle">TE REGALASTE, COMPA 😭</h2>
+          <p id="finalText">Era una joda visual, no pasó absolutamente nada 😌</p>
+          <p class="blink">⚠️ Nivel de inocencia detectado: CRÍTICO ⚠️</p>
+          <div class="footer-note">Moraleja: no abrir cualquier cosa que te manden por curiosidad 😂</div>
+
+          <div class="actions">
+            <button class="btn" id="restartBtn">Reiniciar broma</button>
+            <button class="btn secondary" id="soundBtn">Beep de alerta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== Config ======
+    const apodo = "COMPA";
+
+    // ====== Referencias ======
+    const output = document.getElementById("output");
+    const countdownBox = document.getElementById("countdownBox");
+    const countdownNum = document.getElementById("countdownNum");
+    const progressWrap = document.getElementById("progressWrap");
+    const fill = document.getElementById("fill");
+    const percent = document.getElementById("percent");
+    const statusText = document.getElementById("statusText");
+    const progressLabel = document.getElementById("progressLabel");
+    const warning = document.getElementById("warning");
+    const final = document.getElementById("final");
+    const finalTitle = document.getElementById("finalTitle");
+    const finalText = document.getElementById("finalText");
+    const restartBtn = document.getElementById("restartBtn");
+    const soundBtn = document.getElementById("soundBtn");
+
+    const checklist = [
+      document.getElementById("c1"),
+      document.getElementById("c2"),
+      document.getElementById("c3"),
+      document.getElementById("c4"),
+    ];
+
+    const introLines = [
+      "[+] Estableciendo sesión segura...",
+      "[+] Verificando integridad del entorno...",
+      "[+] Montando interfaz visual...",
+      "[+] Preparando secuencia dramática...",
+      "[+] Ajustando brillo de la vergüenza..."
+    ];
+
+    // ====== Audio fake (beeps) ======
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume().catch(() => {});
+      }
+    }
+
+    function beep(freq = 880, duration = 90, type = "square", volume = 0.02) {
+      ensureAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = type;
+      osc.frequency.value = freq;
+
+      gain.gain.value = volume;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      setTimeout(() => {
+        osc.stop();
+      }, duration);
+    }
+
+    function alertBeepSequence() {
+      beep(900, 120, "square", 0.03);
+      setTimeout(() => beep(700, 120, "square", 0.03), 140);
+      setTimeout(() => beep(980, 180, "square", 0.03), 300);
+    }
+
+    // ====== Utilidades ======
+    function resetUI() {
+      output.innerHTML = "";
+      statusText.textContent = "Iniciando secuencia del sistema...";
+      countdownBox.style.display = "none";
+      countdownNum.textContent = "5";
+      progressWrap.style.display = "none";
+      fill.style.width = "0%";
+      percent.textContent = "0%";
+      progressLabel.textContent = "Escaneando sistema...";
+      warning.style.display = "none";
+      final.style.display = "none";
+
+      checklist.forEach(el => el.classList.remove("done"));
+    }
+
+    function addLine(text) {
+      const line = document.createElement("div");
+      line.textContent = text;
+      line.className = "line-glitch";
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // ====== Flujo principal ======
+    function run
