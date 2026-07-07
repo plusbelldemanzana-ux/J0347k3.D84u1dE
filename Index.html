@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso remoto...</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #00ff66;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .terminal {
+      width: 100%;
+      max-width: 800px;
+      background: #050505;
+      border: 1px solid #00ff66;
+      box-shadow: 0 0 20px rgba(0,255,102,0.25);
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .title {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #7dffaf;
+    }
+
+    #output {
+      white-space: pre-line;
+      line-height: 1.6;
+      min-height: 260px;
+    }
+
+    .progress-box {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 22px;
+      border: 1px solid #00ff66;
+      background: #111;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #00ff66;
+      transition: width 0.4s ease;
+    }
+
+    .final {
+      margin-top: 20px;
+      font-size: 22px;
+      color: #fff;
+      text-align: center;
+      display: none;
+    }
+
+    .small {
+      color: #7dffaf;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
+      display: none;
+    }
+
+    .blink {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="title">root@remote-shell:~# conexión establecida</div>
+    <div id="output"></div>
+
+    <div class="progress-box" id="progressBox">
+      <div>Extrayendo datos...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="final" id="finalMsg"></div>
+    <div class="small" id="smallMsg">Tranqui, no pasó nada. Era una joda 😎</div>
+  </div>
+
+  <script>
+    const nombre = "TU AMIGO"; // <-- CAMBIÁ ESTO
+    const output = document.getElementById("output");
+    const progressBox = document.getElementById("progressBox");
+    const progressFill = document.getElementById("progressFill");
+    const finalMsg = document.getElementById("finalMsg");
+    const smallMsg = document.getElementById("smallMsg");
+
+    const lines = [
+      `[+] Iniciando conexión remota con el dispositivo de ${nombre}...`,
+      `[+] Dirección IP localizada`,
+      `[+] Bypass de seguridad completado`,
+      `[+] Accediendo a galería...`,
+      `[+] Descargando memes privados...`,
+      `[+] Leyendo chats comprometedores...`,
+      `[+] Encontradas 37 fotos dudosas`,
+      `[+] Preparando filtración de vergüenza pública...`
+    ];
+
+    let i = 0;
+
+    function writeLine() {
+      if (i < lines.length) {
+        output.innerHTML += lines[i] + "\n";
+        i++;
+        setTimeout(writeLine, 1000);
+      } else {
+        startProgress();
+      }
+    }
+
+    function startProgress() {
+      progressBox.style.display = "block";
+      let progress = 0;
+
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 12) + 6;
+        if (progress > 100) progress = 100;
+        progressFill.style.width = progress + "%";
+
+        if (progress === 100) {
+          clearInterval(interval);
+          setTimeout(showJoke, 800);
+        }
+      }, 350);
+    }
+
+    function showJoke() {
+      finalMsg.style.display = "block";
+      smallMsg.style.display = "block";
+      finalMsg.innerHTML = `ERA JODA ${nombre} 😂<br><span class="blink">No abras links raros, salame.</span>`;
+    }
+
+    writeLine();
+  </script>
+</body>
+</html>
