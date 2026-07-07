@@ -5,157 +5,492 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Acceso remoto...</title>
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #00ff66;
+    :root{
+      --bg:#05070a;
+      --panel:#0b0f14;
+      --green:#58ff7e;
+      --green2:#21d84f;
+      --red:#ff4d4d;
+      --text:#c8ffd6;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top, rgba(40,255,120,.08), transparent 35%),
+        linear-gradient(180deg, #020304, #071018 70%);
+      color:var(--text);
       font-family: monospace;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-      box-sizing: border-box;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
     }
 
-    .terminal {
-      width: 100%;
-      max-width: 800px;
-      background: #050505;
-      border: 1px solid #00ff66;
-      box-shadow: 0 0 20px rgba(0,255,102,0.25);
-      padding: 20px;
-      border-radius: 8px;
+    /* lluvia de código */
+    #matrix{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      opacity:.22;
     }
 
-    .title {
-      font-size: 18px;
-      margin-bottom: 15px;
-      color: #7dffaf;
+    .wrap{
+      position:relative;
+      z-index:2;
+      width:min(920px, 100%);
     }
 
-    #output {
-      white-space: pre-line;
-      line-height: 1.6;
-      min-height: 260px;
+    .terminal{
+      position:relative;
+      background:rgba(8,12,18,.88);
+      border:1px solid rgba(88,255,126,.35);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.03) inset,
+        0 25px 80px rgba(0,0,0,.55),
+        0 0 30px rgba(88,255,126,.12);
+      backdrop-filter: blur(6px);
     }
 
-    .progress-box {
-      margin-top: 20px;
-      display: none;
+    .terminal::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.03) 0px,
+          rgba(255,255,255,.03) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      pointer-events:none;
+      opacity:.18;
     }
 
-    .progress-bar {
-      width: 100%;
-      height: 22px;
-      border: 1px solid #00ff66;
-      background: #111;
-      overflow: hidden;
-      border-radius: 4px;
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:12px 16px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     }
 
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #00ff66;
-      transition: width 0.4s ease;
+    .dot{width:11px;height:11px;border-radius:50%}
+    .d1{background:#ff5f57}
+    .d2{background:#ffbd2e}
+    .d3{background:#28c840}
+
+    .title{
+      margin-left:10px;
+      color:#9be9b1;
+      font-size:14px;
+      opacity:.9;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    .final {
-      margin-top: 20px;
-      font-size: 22px;
-      color: #fff;
-      text-align: center;
-      display: none;
+    .content{
+      padding:20px;
     }
 
-    .small {
-      color: #7dffaf;
-      font-size: 14px;
-      margin-top: 10px;
-      text-align: center;
-      display: none;
+    .big{
+      font-size: clamp(26px, 4vw, 44px);
+      color:var(--green);
+      font-weight:700;
+      letter-spacing:2px;
+      margin:4px 0 18px;
+      text-shadow:0 0 12px rgba(88,255,126,.35);
     }
 
-    .blink {
+    .status{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:16px;
+      color:#baf8c8;
+      opacity:.95;
+      flex-wrap:wrap;
+    }
+
+    .pulse{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 10px var(--green);
+      animation:pulse 1s infinite;
+    }
+
+    @keyframes pulse{
+      0%{transform:scale(1);opacity:1}
+      50%{transform:scale(1.8);opacity:.45}
+      100%{transform:scale(1);opacity:1}
+    }
+
+    #output{
+      min-height:220px;
+      white-space:pre-line;
+      line-height:1.6;
+      font-size:16px;
+      color:#d9ffe3;
+      text-shadow:0 0 8px rgba(88,255,126,.12);
+    }
+
+    .line-glitch{
+      animation: glitchLine .12s 2;
+    }
+
+    @keyframes glitchLine{
+      0%{transform:translateX(0)}
+      25%{transform:translateX(-2px)}
+      50%{transform:translateX(2px)}
+      75%{transform:translateX(-1px)}
+      100%{transform:translateX(0)}
+    }
+
+    .progress-wrap{
+      margin-top:18px;
+      display:none;
+    }
+
+    .progress-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+      font-size:14px;
+      color:#b8f7c6;
+    }
+
+    .bar{
+      width:100%;
+      height:18px;
+      border-radius:999px;
+      background:#121a22;
+      border:1px solid rgba(88,255,126,.25);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .fill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:
+        linear-gradient(90deg, var(--green2), var(--green));
+      box-shadow:0 0 14px rgba(88,255,126,.4);
+      transition:width .22s linear;
+      position:relative;
+    }
+
+    .fill::after{
+      content:"";
+      position:absolute;
+      top:0; right:0;
+      width:40px; height:100%;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.45));
+      filter:blur(2px);
+    }
+
+    .checklist{
+      margin-top:18px;
+      display:grid;
+      gap:8px;
+      font-size:15px;
+      color:#d5ffe0;
+    }
+
+    .item{
+      opacity:.35;
+      transform:translateX(-8px);
+      transition:.25s ease;
+    }
+
+    .item.done{
+      opacity:1;
+      transform:translateX(0);
+    }
+
+    .item.done::before{
+      content:"> ";
+      color:var(--green);
+    }
+
+    .warning{
+      margin-top:18px;
+      color:var(--red);
+      font-weight:700;
+      display:none;
+      animation: shake .35s 3;
+      text-shadow:0 0 10px rgba(255,77,77,.35);
+    }
+
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-5px)}
+      40%{transform:translateX(5px)}
+      60%{transform:translateX(-4px)}
+      80%{transform:translateX(4px)}
+    }
+
+    .final{
+      display:none;
+      margin-top:22px;
+      padding:18px;
+      border-radius:16px;
+      background:rgba(88,255,126,.08);
+      border:1px solid rgba(88,255,126,.25);
+      text-align:center;
+      animation: pop .35s ease;
+    }
+
+    @keyframes pop{
+      from{transform:scale(.96);opacity:0}
+      to{transform:scale(1);opacity:1}
+    }
+
+    .final h2{
+      margin:0 0 8px;
+      font-size:clamp(24px,4vw,34px);
+      color:#fff;
+    }
+
+    .final p{
+      margin:6px 0;
+      color:#d7ffe1;
+      font-size:16px;
+    }
+
+    .blink{
       animation: blink 1s infinite;
     }
 
-    @keyframes blink {
-      50% { opacity: 0; }
+    @keyframes blink{
+      50%{opacity:.2}
+    }
+
+    .footer-note{
+      margin-top:10px;
+      font-size:13px;
+      opacity:.7;
+    }
+
+    .screen-flash{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.06);
+      opacity:0;
+      pointer-events:none;
+      z-index:3;
+    }
+
+    .screen-flash.show{
+      animation: flash .25s linear 2;
+    }
+
+    @keyframes flash{
+      0%{opacity:0}
+      50%{opacity:.22}
+      100%{opacity:0}
+    }
+
+    .red{
+      color:var(--red);
     }
   </style>
 </head>
 <body>
-  <div class="terminal">
-    <div class="title">root@remote-shell:~# conexión establecida</div>
-    <div id="output"></div>
+  <canvas id="matrix"></canvas>
+  <div class="screen-flash" id="flash"></div>
 
-    <div class="progress-box" id="progressBox">
-      <div>Extrayendo datos...</div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+  <div class="wrap">
+    <div class="terminal">
+      <div class="topbar">
+        <div class="dot d1"></div>
+        <div class="dot d2"></div>
+        <div class="dot d3"></div>
+        <div class="title">root@remote-shell:~# sesión iniciada</div>
+      </div>
+
+      <div class="content">
+        <div class="big">ACCESO REMOTO...</div>
+
+        <div class="status">
+          <div class="pulse"></div>
+          <div id="statusText">Iniciando conexión segura al dispositivo objetivo</div>
+        </div>
+
+        <div id="output"></div>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-head">
+            <span id="progressLabel">Escaneando sistema...</span>
+            <span id="percent">0%</span>
+          </div>
+          <div class="bar">
+            <div class="fill" id="fill"></div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklist">
+          <div class="item" id="c1">Escaneando puertos...</div>
+          <div class="item" id="c2">Conectando con la nube de memes...</div>
+          <div class="item" id="c3">Accediendo a conversaciones comprometedoras...</div>
+          <div class="item" id="c4">Compilando nivel de vergüenza...</div>
+        </div>
+
+        <div class="warning" id="warning">[!] ALERTA: se detectó material dudoso en el dispositivo</div>
+
+        <div class="final" id="final">
+          <h2 id="finalTitle">TE REGALASTE 😭</h2>
+          <p id="finalText">Era una joda. Dejá de abrir cualquier link.</p>
+          <p class="blink">⚠️ Nivel de inocencia del objetivo: crítico ⚠️</p>
+          <div class="footer-note">No pasó nada real. Solo quedaste expuesto por curioso 😌</div>
+        </div>
       </div>
     </div>
-
-    <div class="final" id="finalMsg"></div>
-    <div class="small" id="smallMsg">Tranqui, no pasó nada. Era una joda 😎</div>
   </div>
 
   <script>
-    const nombre = "MANUEL";
-    const output = document.getElementById("output");
-    const progressBox = document.getElementById("progressBox");
-    const progressFill = document.getElementById("progressFill");
-    const finalMsg = document.getElementById("finalMsg");
-    const smallMsg = document.getElementById("smallMsg");
+    /* ========= PERSONALIZÁ ESTO ========= */
+    const nombre = "bro🙄";
+    const remateFinal = "JAJA " + BROOO+ ", caíste redondo. Era una joda 😂 estaba aburrida";
+    /* ==================================== */
 
-    const lines = [
-      `[+] Iniciando conexión remota con el dispositivo de ${nombre}...`,
-      `[+] Dirección IP localizada`,
-      `[+] Bypass de seguridad completado`,
-      `[+] Accediendo a galería...`,
-      `[+] Descargando memes privados...`,
-      `[+] Leyendo chats comprometedores...`,
-      `[+] Encontradas 37 fotos dudosas`,
-      `[+] Preparando filtración de vergüenza pública...`
+    const output = document.getElementById("output");
+    const progressWrap = document.getElementById("progressWrap");
+    const fill = document.getElementById("fill");
+    const percent = document.getElementById("percent");
+    const statusText = document.getElementById("statusText");
+    const progressLabel = document.getElementById("progressLabel");
+    const warning = document.getElementById("warning");
+    const final = document.getElementById("final");
+    const finalTitle = document.getElementById("finalTitle");
+    const finalText = document.getElementById("finalText");
+    const flash = document.getElementById("flash");
+
+    const checklist = [
+      document.getElementById("c1"),
+      document.getElementById("c2"),
+      document.getElementById("c3"),
+      document.getElementById("c4"),
     ];
 
-    let i = 0;
+    const introLines = [
+      `[+] Estableciendo conexión cifrada con el dispositivo de ${nombre}...`,
+      `[+] Saltando verificación de seguridad...`,
+      `[+] Accediendo a la carpeta "cosas que dan vergüenza"...`,
+      `[+] Sincronizando memes privados y capturas dudosas...`,
+      `[+] Analizando historial de decisiones cuestionables...`
+    ];
 
-    function writeLine() {
-      if (i < lines.length) {
-        output.innerHTML += lines[i] + "\n";
-        i++;
-        setTimeout(writeLine, 1000);
+    let lineIndex = 0;
+
+    function typeLines() {
+      if (lineIndex < introLines.length) {
+        const line = document.createElement("div");
+        line.className = "line-glitch";
+        line.textContent = introLines[lineIndex];
+        output.appendChild(line);
+        output.appendChild(document.createTextNode("\n"));
+        lineIndex++;
+        setTimeout(typeLines, 850);
       } else {
-        startProgress();
+        setTimeout(startProgress, 500);
       }
     }
 
     function startProgress() {
-      progressBox.style.display = "block";
-      let progress = 0;
+      progressWrap.style.display = "block";
+      statusText.textContent = `Extrayendo datos del dispositivo de ${nombre}...`;
+
+      let p = 0;
+      let checklistIndex = 0;
 
       const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 12) + 6;
-        if (progress > 100) progress = 100;
-        progressFill.style.width = progress + "%";
+        p += Math.floor(Math.random() * 8) + 4;
+        if (p > 100) p = 100;
 
-        if (progress === 100) {
-          clearInterval(interval);
-          setTimeout(showJoke, 800);
+        fill.style.width = p + "%";
+        percent.textContent = p + "%";
+
+        if (p < 25) progressLabel.textContent = "Escaneando sistema...";
+        else if (p < 50) progressLabel.textContent = "Abriendo archivos sospechosos...";
+        else if (p < 75) progressLabel.textContent = "Subiendo vergüenza al servidor...";
+        else progressLabel.textContent = "Generando informe final...";
+
+        if (checklistIndex < checklist.length && p >= (checklistIndex + 1) * 25) {
+          checklist[checklistIndex].classList.add("done");
+          checklistIndex++;
         }
-      }, 350);
+
+        if (p >= 82 && warning.style.display !== "block") {
+          warning.style.display = "block";
+          flash.classList.add("show");
+          setTimeout(() => flash.classList.remove("show"), 500);
+        }
+
+        if (p === 100) {
+          clearInterval(interval);
+          setTimeout(showFinal, 1200);
+        }
+      }, 180);
     }
 
-    function showJoke() {
-      finalMsg.style.display = "block";
-      smallMsg.style.display = "block";
-      finalMsg.innerHTML = `TE REGALASTE MANUEL😂<br><span class="blink">No abras links raros, 😘.</span>`;
+    function showFinal() {
+      statusText.innerHTML = `<span class="red">[!] Operación completada</span>`;
+      final.style.display = "block";
+      finalTitle.textContent = `TE REGALASTE ${nombre} 😭`;
+      finalText.textContent = remateFinal;
     }
 
-    writeLine();
+    typeLines();
+
+    /* ======== FONDO "matrix" ======== */
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    }
+    resizeCanvas();
+    addEventListener("resize", resizeCanvas);
+
+    const letters = "01<>/$#%&@ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const fontSize = 16;
+    let columns = Math.floor(window.innerWidth / fontSize);
+    let drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      columns = Math.floor(window.innerWidth / fontSize);
+      if (drops.length !== columns) drops = Array(columns).fill(1);
+
+      ctx.fillStyle = "rgba(2, 4, 6, 0.10)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#4dff88";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 45);
   </script>
 </body>
 </html>
