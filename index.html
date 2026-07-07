@@ -434,10 +434,8 @@
   </div>
 
   <script>
-    // ====== Config ======
     const apodo = "COMPA";
 
-    // ====== Referencias ======
     const output = document.getElementById("output");
     const countdownBox = document.getElementById("countdownBox");
     const countdownNum = document.getElementById("countdownNum");
@@ -468,7 +466,6 @@
       "[+] Ajustando brillo de la vergüenza..."
     ];
 
-    // ====== Audio fake (beeps) ======
     let audioCtx = null;
 
     function ensureAudio() {
@@ -490,15 +487,13 @@
 
       osc.type = type;
       osc.frequency.value = freq;
-
       gain.gain.value = volume;
+
       osc.connect(gain);
       gain.connect(audioCtx.destination);
 
       osc.start();
-      setTimeout(() => {
-        osc.stop();
-      }, duration);
+      setTimeout(() => osc.stop(), duration);
     }
 
     function alertBeepSequence() {
@@ -507,7 +502,6 @@
       setTimeout(() => beep(980, 180, "square", 0.03), 300);
     }
 
-    // ====== Utilidades ======
     function resetUI() {
       output.innerHTML = "";
       statusText.textContent = "Iniciando secuencia del sistema...";
@@ -519,7 +513,6 @@
       progressLabel.textContent = "Escaneando sistema...";
       warning.style.display = "none";
       final.style.display = "none";
-
       checklist.forEach(el => el.classList.remove("done"));
     }
 
@@ -528,8 +521,134 @@
       line.textContent = text;
       line.className = "line-glitch";
       output.appendChild(line);
-      output.scrollTop = output.scrollHeight;
     }
 
-    // ====== Flujo principal ======
-    function run
+    function runIntro() {
+      let i = 0;
+      statusText.textContent = "Inicializando consola...";
+      const introTimer = setInterval(() => {
+        addLine(introLines[i]);
+        beep(780 + (i * 40), 55, "square", 0.018);
+        i++;
+        if (i >= introLines.length) {
+          clearInterval(introTimer);
+          setTimeout(startCountdown, 600);
+        }
+      }, 650);
+    }
+
+    function startCountdown() {
+      countdownBox.style.display = "block";
+      statusText.textContent = "Verificación final antes del remate...";
+      let n = 5;
+
+      const cd = setInterval(() => {
+        countdownNum.textContent = n;
+        beep(520 + (5 - n) * 90, 90, "triangle", 0.03);
+        n--;
+
+        if (n < 0) {
+          clearInterval(cd);
+          countdownBox.style.display = "none";
+          setTimeout(startProgress, 250);
+        }
+      }, 900);
+    }
+
+    function startProgress() {
+      progressWrap.style.display = "block";
+      statusText.textContent = `Compilando diagnóstico final de ${apodo}...`;
+
+      let p = 0;
+      let check = 0;
+
+      const progressTimer = setInterval(() => {
+        p += Math.floor(Math.random() * 7) + 4;
+        if (p > 100) p = 100;
+
+        fill.style.width = p + "%";
+        percent.textContent = p + "%";
+
+        if (p < 25) progressLabel.textContent = "Escaneando sistema...";
+        else if (p < 50) progressLabel.textContent = "Sincronizando animaciones...";
+        else if (p < 75) progressLabel.textContent = "Calculando nivel de inocencia...";
+        else progressLabel.textContent = "Preparando remate final...";
+
+        if (check < checklist.length && p >= (check + 1) * 25) {
+          checklist[check].classList.add("done");
+          beep(660 + check * 120, 80, "square", 0.02);
+          check++;
+        }
+
+        if (p >= 82 && warning.style.display !== "block") {
+          warning.style.display = "block";
+          alertBeepSequence();
+        }
+
+        if (p === 100) {
+          clearInterval(progressTimer);
+          setTimeout(showFinal, 900);
+        }
+      }, 180);
+    }
+
+    function showFinal() {
+      statusText.innerHTML = `<span class="red">[!] Resultado final generado</span>`;
+      finalTitle.textContent = `TE REGALASTE, ${apodo} 😭`;
+      finalText.textContent = "Era una joda visual, no pasó nada real 😂";
+      final.style.display = "block";
+      alertBeepSequence();
+      setTimeout(() => beep(520, 220, "sawtooth", 0.02), 420);
+    }
+
+    function startAll() {
+      resetUI();
+      ensureAudio();
+      setTimeout(runIntro, 250);
+    }
+
+    restartBtn.addEventListener("click", startAll);
+    soundBtn.addEventListener("click", alertBeepSequence);
+
+    startAll();
+
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    }
+    resizeCanvas();
+    addEventListener("resize", resizeCanvas);
+
+    const letters = "01<>/$#%&@ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const fontSize = 16;
+    let columns = Math.floor(window.innerWidth / fontSize);
+    let drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      columns = Math.floor(window.innerWidth / fontSize);
+      if (drops.length !== columns) drops = Array(columns).fill(1);
+
+      ctx.fillStyle = "rgba(2, 4, 6, 0.10)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#4dff88";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 45);
+  </script>
+</body>
+</html>
